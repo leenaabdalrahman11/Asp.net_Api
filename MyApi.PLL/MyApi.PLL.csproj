@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+<ItemGroup>
+  <PackageReference Include="Mapster" Version="9.0.0-pre01" />
+  <PackageReference Include="Mapster.DependencyInjection" Version="9.0.0-pre01" />
+  <PackageReference Include="Microsoft.AspNetCore.Localization" Version="2.3.0" />
+  <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.8" />
+  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+  <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
+  <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0">
+    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    <PrivateAssets>all</PrivateAssets>
+  </PackageReference>
+  <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.1" />
+</ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MyApi.BLL\MyApi.BLL.csproj" />
+    <ProjectReference Include="..\MyApi.DAL\MyApi.DAL.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,14 @@
+C:\Users\leena\Desktop\ASP-API-Round12\MyApiProject\MyApi.DAL\bin\Debug\net9.0\MyApi.DAL.deps.json
+C:\Users\leena\Desktop\ASP-API-Round12\MyApiProject\MyApi.DAL\bin\Debug\net9.0\MyApi.DAL.runtimeconfig.json
+C:\Users\leena\Desktop\ASP-API-Round12\MyApiProject\MyApi.DAL\bin\Debug\net9.0\MyApi.DAL.dll
+C:\Users\leena\Desktop\ASP-API-Round12\MyApiProject\MyApi.DAL\bin\Debug\net9.0\MyApi.DAL.pdb
+C:\Users\leena\Desktop\ASP-API-Round12\MyApiProject\MyApi.DAL\obj\Debug\net9.0\MyApi.DAL.csproj.AssemblyReference.cache
+C:\Users\leena\Desktop\ASP-API-Round12\MyApiProject\MyApi.DAL\obj\Debug\net9.0\MyApi.DAL.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\leena\Desktop\ASP-API-Round12\MyApiProject\MyApi.DAL\obj\Debug\net9.0\MyApi.DAL.AssemblyInfoInputs.cache
+C:\Users\leena\Desktop\ASP-API-Round12\MyApiProject\MyApi.DAL\obj\Debug\net9.0\MyApi.DAL.AssemblyInfo.cs
+C:\Users\leena\Desktop\ASP-API-Round12\MyApiProject\MyApi.DAL\obj\Debug\net9.0\MyApi.DAL.csproj.CoreCompileInputs.cache
+C:\Users\leena\Desktop\ASP-API-Round12\MyApiProject\MyApi.DAL\obj\Debug\net9.0\MyApi.DAL.dll
+C:\Users\leena\Desktop\ASP-API-Round12\MyApiProject\MyApi.DAL\obj\Debug\net9.0\refint\MyApi.DAL.dll
+C:\Users\leena\Desktop\ASP-API-Round12\MyApiProject\MyApi.DAL\obj\Debug\net9.0\MyApi.DAL.pdb
+C:\Users\leena\Desktop\ASP-API-Round12\MyApiProject\MyApi.DAL\obj\Debug\net9.0\MyApi.DAL.genruntimeconfig.cache
+C:\Users\leena\Desktop\ASP-API-Round12\MyApiProject\MyApi.DAL\obj\Debug\net9.0\ref\MyApi.DAL.dll
