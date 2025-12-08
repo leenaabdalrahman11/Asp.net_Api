@@ -1,6 +1,4 @@
 ﻿using Mapster;
-using MapsterMapper;
-
 using MyApi.DAL; 
 using MyApi.PLL; 
 using Microsoft.AspNetCore.Http;
@@ -10,10 +8,10 @@ using Microsoft.Extensions.Localization;
 using System.Xml.Linq;
 using MyApi.DAL.Data;
 using MyApi.DAL.DTO.Requests;
-using MyApi.PLL.Models;
 using MyApi.DAL.DTO.Response;
-using MyApi.DAL.Reository;
+using MyApi.DAL.Repository;
 using MyApi.BLL.Service;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MyApi.PLL.Controllers
 {
@@ -23,7 +21,6 @@ namespace MyApi.PLL.Controllers
     {
         //private readonly ApplicationDbContext _context;
         private readonly IStringLocalizer<SharedResources> _localizer;
-
         private readonly ICategoryService _categoryService;
         public CategoriesController(ICategoryService CategoryService, IStringLocalizer<SharedResources> localizer)
         {
@@ -38,6 +35,7 @@ namespace MyApi.PLL.Controllers
             
         }
         [HttpPost("")]
+        [Authorize]
         public IActionResult Create(CategoryRequest request)
         {
             var response = _categoryService.Create(request);

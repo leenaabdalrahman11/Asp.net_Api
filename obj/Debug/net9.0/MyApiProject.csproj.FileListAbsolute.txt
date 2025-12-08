@@ -9,3 +9,4 @@ C:\Users\leena\Desktop\ASP-API-Round12\MyApiProject\obj\Debug\net9.0\MyApiProjec
 C:\Users\leena\Desktop\ASP-API-Round12\MyApiProject\obj\Debug\net9.0\MyApiProject.csproj.CoreCompileInputs.cache
 C:\Users\leena\Desktop\ASP-API-Round12\MyApiProject\obj\Debug\net9.0\MyApiProject.MvcApplicationPartsAssemblyInfo.cs
 C:\Users\leena\Desktop\ASP-API-Round12\MyApiProject\obj\Debug\net9.0\MyApiProject.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\leena\Desktop\ASP-API-Round12\MyApiProject\obj\Debug\net9.0\MyApiProject.sourcelink.json

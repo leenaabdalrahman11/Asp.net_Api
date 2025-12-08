@@ -1,11 +1,11 @@
-﻿using MyApi.PLL.Models;
+﻿using MyApi.DAL.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MyApi.DAL.Reository
+namespace MyApi.DAL.Repository
 {
     public interface ICategoryRepository
     {
@@ -14,3 +14,5 @@ namespace MyApi.DAL.Reository
 
     }
 }
+
+

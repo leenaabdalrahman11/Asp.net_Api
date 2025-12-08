@@ -1,4 +1,4 @@
-﻿namespace MyApi.PLL.Models
+﻿namespace MyApi.DAL.Models
 {
     public enum Status
     {

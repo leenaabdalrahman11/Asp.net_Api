@@ -1,4 +1,4 @@
-@MyApi.PLL_HostAddress = http://localhost:5222
+@MyApi.PLL_HostAddress = http://localhost:7291
 
 GET {{MyApi.PLL_HostAddress}}/weatherforecast/
 Accept: application/json

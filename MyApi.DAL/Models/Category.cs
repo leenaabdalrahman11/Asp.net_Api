@@ -1,4 +1,6 @@
-﻿namespace MyApi.PLL.Models
+﻿using MyApi.DAL.Models;
+
+namespace MyApi.DAL.Models
 {
     public class Category: BaseModel
     {
