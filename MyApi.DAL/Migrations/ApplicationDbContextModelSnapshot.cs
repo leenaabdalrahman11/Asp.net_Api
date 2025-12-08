@@ -166,6 +166,12 @@ namespace MyApi.DAL.Migrations
                     b.Property<string>("Address")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("City")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CodeResetPassword")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -176,6 +182,9 @@ namespace MyApi.DAL.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<DateTime?>("ExpireResetPassword")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("FullName")
                         .HasColumnType("nvarchar(max)");
@@ -226,7 +235,7 @@ namespace MyApi.DAL.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("MyApi.PLL.Models.Category", b =>
+            modelBuilder.Entity("MyApi.DAL.Models.Category", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -245,7 +254,7 @@ namespace MyApi.DAL.Migrations
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("MyApi.PLL.Models.CategoryTranslation", b =>
+            modelBuilder.Entity("MyApi.DAL.Models.CategoryTranslation", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -321,9 +330,9 @@ namespace MyApi.DAL.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("MyApi.PLL.Models.CategoryTranslation", b =>
+            modelBuilder.Entity("MyApi.DAL.Models.CategoryTranslation", b =>
                 {
-                    b.HasOne("MyApi.PLL.Models.Category", "Category")
+                    b.HasOne("MyApi.DAL.Models.Category", "Category")
                         .WithMany("Translations")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -332,7 +341,7 @@ namespace MyApi.DAL.Migrations
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("MyApi.PLL.Models.Category", b =>
+            modelBuilder.Entity("MyApi.DAL.Models.Category", b =>
                 {
                     b.Navigation("Translations");
                 });

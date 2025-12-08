@@ -4,8 +4,8 @@ using System.Linq;
 using MyApi.BLL.Service;
 using System.Text;
 using System.Threading.Tasks;
-using MyApi.DAL.Reository;
-using MyApi.PLL.Models;
+using MyApi.DAL.Repository;
+using MyApi.DAL.Models;
 using MyApi.DAL.DTO.Response;
 using Mapster;
 using MyApi.DAL.DTO.Requests;
@@ -15,7 +15,7 @@ namespace MyApi.BLL.Service
     public class CategoryService : ICategoryService
     {
         private readonly ICategoryRepository _categoryRepository;
-        public CategoryService(DAL.Reository.ICategoryRepository categoryRepository)
+        public CategoryService(DAL.Repository.ICategoryRepository categoryRepository)
         {
             _categoryRepository = categoryRepository;
         }
