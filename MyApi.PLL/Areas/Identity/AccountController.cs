@@ -21,8 +21,8 @@ namespace MyApi.PLL.Areas.Identity
 
         }
 
- [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterUserRequest dto)
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterUserRequest dto)
         {
             var result = await _authenticationService.RegisterAsync(dto);
             if (result.IsSuccess)
@@ -34,9 +34,23 @@ namespace MyApi.PLL.Areas.Identity
                 return BadRequest(result);
             }
         }
+        [HttpGet("confirmEmail")]
+        public async Task<IActionResult> ConfirmEmail([FromQuery] string userId, [FromQuery] string token)
+        {
+            var result = await _authenticationService.ConfirmEmailAsync(userId, token);
+            if (result == "Email confirmed")
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
 
- [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest dto)
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequest dto)
         {
             var result = await _authenticationService.LoginAsync(dto);
             if (result.IsSuccess)
@@ -48,6 +62,32 @@ namespace MyApi.PLL.Areas.Identity
                 return BadRequest(result);
             }
         }
-}
+        [HttpPost("forgotPassword")]
+        public async Task<IActionResult> RequestPasswordReset([FromBody] ForgotPasswordRequest request)
+        {
+            var result = await _authenticationService.RequestPasswordResetAsync(request);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
+        [HttpPatch("resetPassword")]
+        public async Task<IActionResult> ResetPassword( ResetPasswordRequest dto)
+        {
+            var result = await _authenticationService.ResetPasswordAsync(dto);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
+    }
 
 }
