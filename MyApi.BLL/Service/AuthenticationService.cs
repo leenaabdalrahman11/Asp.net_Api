@@ -82,7 +82,7 @@ namespace MyApi.BLL.Service
                     UserId = null
                 };
             }
-
+            
             // reset access failed count on success
             await _userManager.ResetAccessFailedCountAsync(user);
 
