@@ -1,1 +1,7 @@
 .vs
+bin/
+obj/
+**/bin/
+**/obj/
+*.dll
+*.pdb
