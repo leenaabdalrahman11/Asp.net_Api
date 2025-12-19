@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using MyApi.DAL.Data;
 using System.Globalization;
 using Microsoft.AspNetCore.Localization;
@@ -13,6 +13,7 @@ using MyApi.DAL.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using MyApi.DAL.Utils;
 using MyApi.DAL.Repository;
+using Microsoft.CodeAnalysis.Options;
 
 public class Program
 {
@@ -20,21 +21,30 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // Add services to the container
         builder.Services.AddControllers();
         builder.Services.AddOpenApi();
         builder.Services.AddLocalization(options => options.ResourcesPath = "");
 
-        // Database
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-        // Identity
-        builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+        builder.Services.AddIdentity<ApplicationUser, IdentityRole>(Options =>
+        {
+            Options.User.RequireUniqueEmail = true;
+            Options.Password.RequireDigit = true;
+            Options.Password.RequireLowercase = true;
+            Options.Password.RequireUppercase = true;
+            Options.Password.RequireNonAlphanumeric = false;
+            Options.Password.RequiredLength = 6;
+            Options.SignIn.RequireConfirmedEmail = true;
+
+            Options.Lockout.MaxFailedAccessAttempts = 5;
+            Options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+            Options.SignIn.RequireConfirmedEmail = true;
+        })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
-        // JWT Authentication
         builder.Services.AddAuthentication(opt =>
         {
             opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -54,7 +64,6 @@ public class Program
             };
         });
 
-        // Localization options
         const string defaultCulture = "en";
         var supportedCultures = new[] { new CultureInfo(defaultCulture), new CultureInfo("ar") };
         builder.Services.Configure<RequestLocalizationOptions>(options =>
@@ -69,7 +78,6 @@ public class Program
             });
         });
 
-        // Swagger
         builder.Services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new() { Title = "My API", Version = "v1" });
@@ -100,17 +108,14 @@ public class Program
 
         );
 
-        // Dependency Injection
         builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
         builder.Services.AddScoped<ICategoryService, CategoryService>();
         builder.Services.AddScoped<ISeedData, RoleSeedData>();
         builder.Services.AddScoped<ISeedData, UserSeedData>();
         builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
-
-        // Build app
+        builder.Services.AddTransient<IEmailSender, EmailSender>();
         var app = builder.Build();
 
-        // Middleware
         app.UseRequestLocalization(app.Services.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value);
 
         if (app.Environment.IsDevelopment())
@@ -128,7 +133,6 @@ public class Program
         app.UseAuthentication();
         app.UseAuthorization();
 
-        // Database Migration and Seeding
         using (var scope = app.Services.CreateScope())
         {
             var services = scope.ServiceProvider;
@@ -147,3 +151,4 @@ public class Program
         app.Run();
     }
 }
+
