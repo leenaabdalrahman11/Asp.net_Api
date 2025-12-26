@@ -11,3 +11,7 @@ obj/
 # build artifacts
 **/bin/
 **/obj/
+
+# build artifacts
+**/bin/
+**/obj/
