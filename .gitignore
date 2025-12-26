@@ -5,13 +5,3 @@ obj/
 **/obj/
 *.dll
 *.pdb
-.vs/
-
-
-# build artifacts
-**/bin/
-**/obj/
-
-# build artifacts
-**/bin/
-**/obj/
