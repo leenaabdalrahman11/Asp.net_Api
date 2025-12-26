@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MyApi.DAL")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+92c1c7a9d531ff7f64d14c256285eee5d38ad157")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+db0a9ba2871882c3cfa91c7fa8342a1795100501")]
 [assembly: System.Reflection.AssemblyProductAttribute("MyApi.DAL")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MyApi.DAL")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

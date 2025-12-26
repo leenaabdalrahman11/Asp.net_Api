@@ -1,33 +1,46 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using MyApi.DAL.Models;
-using Microsoft.AspNetCore.Identity;
-
 
 namespace MyApi.DAL.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    public sealed class ApplicationDbContext
+        : IdentityDbContext<ApplicationUser>
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options)
+        public ApplicationDbContext(
+            DbContextOptions<ApplicationDbContext> options
+        ) : base(options)
         {
         }
+        
+        public DbSet<Category> Categories { get; set; } = null!;
+        public DbSet<CategoryTranslation> CategoryTranslations { get; set; } = null!;
 
-        // يجب تعريف DbSet لجميع الجداول
-        public DbSet<Category> Categories { get; set; }
-        public DbSet<CategoryTranslation> CategoryTranslations { get; set; }
-
-        protected override void OnModelCreating(ModelBuilder builder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(builder);
+            base.OnModelCreating(modelBuilder);
 
-            builder.Entity<ApplicationUser>().ToTable("Users");
-            builder.Entity<IdentityRole>().ToTable("Roles");
-            builder.Entity<IdentityUserRole<string>>().ToTable("UserRoles");
-            builder.Entity<IdentityUserClaim<string>>().ToTable("UserClaims");
-            builder.Entity<IdentityUserLogin<string>>().ToTable("UserLogins");
-            builder.Entity<IdentityRoleClaim<string>>().ToTable("RoleClaims");
-            builder.Entity<IdentityUserToken<string>>().ToTable("UserTokens");
+            modelBuilder.Entity<ApplicationUser>()
+                        .ToTable("Users");
+
+            modelBuilder.Entity<IdentityRole>()
+                        .ToTable("Roles");
+
+            modelBuilder.Entity<IdentityUserRole<string>>()
+                        .ToTable("UserRoles");
+
+            modelBuilder.Entity<IdentityUserClaim<string>>()
+                        .ToTable("UserClaims");
+
+            modelBuilder.Entity<IdentityUserLogin<string>>()
+                        .ToTable("UserLogins");
+
+            modelBuilder.Entity<IdentityRoleClaim<string>>()
+                        .ToTable("RoleClaims");
+
+            modelBuilder.Entity<IdentityUserToken<string>>()
+                        .ToTable("UserTokens");
         }
     }
 }

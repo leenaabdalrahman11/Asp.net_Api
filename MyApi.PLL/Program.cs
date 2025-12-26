@@ -13,7 +13,6 @@ using MyApi.DAL.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using MyApi.DAL.Utils;
 using MyApi.DAL.Repository;
-using Microsoft.CodeAnalysis.Options;
 
 public class Program
 {
@@ -52,6 +51,14 @@ public class Program
         })
         .AddJwtBearer(options =>
         {
+            var secret = builder.Configuration["Jwt:SecretKey"]
+                ?? throw new InvalidOperationException("Jwt:SecretKey is missing.");
+
+            var keyBytes = HexToBytes(secret);
+
+            if (keyBytes.Length < 32)
+                throw new InvalidOperationException("JWT SecretKey too short. Use at least 32 bytes (64 hex chars).");
+
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
@@ -60,8 +67,10 @@ public class Program
                 ValidateIssuerSigningKey = true,
                 ValidIssuer = builder.Configuration["Jwt:Issuer"],
                 ValidAudience = builder.Configuration["Jwt:Audience"],
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]))
+                IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
+                ClockSkew = TimeSpan.Zero
             };
+
         });
 
         const string defaultCulture = "en";
@@ -149,6 +158,15 @@ public class Program
 
         app.MapControllers();
         app.Run();
+        static byte[] HexToBytes(string hex)
+        {
+            if (string.IsNullOrWhiteSpace(hex))
+                throw new ArgumentException("Jwt:SecretKey is missing.");
+
+            if (hex.Length % 2 != 0)
+                throw new ArgumentException("Invalid hex string length.");
+
+            return Convert.FromHexString(hex);
+        }
     }
 }
-
