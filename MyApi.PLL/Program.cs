@@ -13,7 +13,6 @@ using MyApi.DAL.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using MyApi.DAL.Utils;
 using MyApi.DAL.Repository;
-using Microsoft.CodeAnalysis.Options;
 
 public class Program
 {
