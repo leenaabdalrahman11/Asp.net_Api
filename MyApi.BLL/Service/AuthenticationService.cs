@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+
 using MyApi.DAL.DTO.Requests;
 using MyApi.DAL.DTO.Response;
 using MyApi.DAL.Models;
@@ -23,96 +24,135 @@ namespace MyApi.BLL.Service
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
         private readonly IEmailSender _emailSender;
+        private readonly SignInManager<ApplicationUser> _signInManager;
         public AuthenticationService(UserManager<ApplicationUser> userManager, IConfiguration configuration,
-        IEmailSender emailSender)
+        IEmailSender emailSender, SignInManager<ApplicationUser> signInManager)
         {
             _userManager = userManager;
             _configuration = configuration;
             _emailSender = emailSender;
+            _signInManager = signInManager;
         }
         public async Task<LoginResponse> LoginAsync(LoginRequest loginRequest)
         {
-            if (string.IsNullOrWhiteSpace(loginRequest.Email))
+            try
             {
+                if (string.IsNullOrWhiteSpace(loginRequest.Email))
+                {
+                    return new LoginResponse
+                    {
+                        IsSuccess = false,
+                        Message = "Email is required",
+                        UserId = null
+                    };
+                }
+                if (string.IsNullOrWhiteSpace(loginRequest.Password))
+                {
+                    return new LoginResponse
+                    {
+                        IsSuccess = false,
+                        Message = "Password is required",
+                        UserId = null
+                    };
+                }
+
+                var user = await _userManager.FindByEmailAsync(loginRequest.Email);
+                if (user == null)
+                {
+                    return new LoginResponse
+                    {
+                        IsSuccess = false,
+                        Message = "User not found",
+                        UserId = null
+                    };
+                }
+                if (await _userManager.IsLockedOutAsync(user))
+                {
+                    return new LoginResponse
+                    {
+                        IsSuccess = false,
+                        Message = "User account is locked",
+                        UserId = null
+                    };
+
+                }
+                var passwordValid = await _userManager.CheckPasswordAsync(user, loginRequest.Password);
+                if (!passwordValid)
+                {
+                    await _userManager.AccessFailedAsync(user);
+                    return new LoginResponse
+                    {
+                        IsSuccess = false,
+                        Message = "Invalid password",
+                        UserId = null
+                    };
+                }
+
+                // reset access failed count on success
+                await _userManager.ResetAccessFailedCountAsync(user);
+
+                if (await _userManager.IsLockedOutAsync(user))
+                {
+                    return new LoginResponse
+                    {
+                        IsSuccess = false,
+                        Message = "User account is locked",
+                        UserId = null
+                    };
+                }
+                var result = await _signInManager.CheckPasswordSignInAsync(user, loginRequest.Password, true);
+                if (result.IsLockedOut)
+                {
+                    return new LoginResponse
+                    {
+                        IsSuccess = false,
+                        Message = "User account is locked Due to multiple failed attempts",
+                        UserId = null
+                    };
+
+                }
+                else if (result.IsNotAllowed)
+                {
+                    return new LoginResponse
+                    {
+                        IsSuccess = false,
+                        Message = "Please confirm your email",
+                        UserId = null
+                    };
+
+                }
+
+                if (!result.Succeeded)
+                {
+                    return new LoginResponse
+                    {
+                        IsSuccess = false,
+                        Message = "Invalid Password",
+                        UserId = null
+                    };
+                }
+
                 return new LoginResponse
                 {
-                    IsSuccess = false,
-                    Message = "Email is required",
-                    UserId = null
+                    IsSuccess = true,
+                    Message = "Login successful",
+                    UserId = user.Id,
+                    AccessToken = await GenerateAccessToken(user)
                 };
+
             }
-            if (string.IsNullOrWhiteSpace(loginRequest.Password))
+            catch (Exception ex)
             {
-                return new LoginResponse
+                return new LoginResponse()
                 {
                     IsSuccess = false,
-                    Message = "Password is required",
-                    UserId = null
+                    Message = "An error occurred during registration",
+                    UserId = null!,
+                    Errors = new List<string> { ex.Message }
+
                 };
             }
 
-            var user = await _userManager.FindByEmailAsync(loginRequest.Email);
-            if (user == null)
-            {
-                return new LoginResponse
-                {
-                    IsSuccess = false,
-                    Message = "User not found",
-                    UserId = null
-                };
-            }
-            if (await _userManager.IsLockedOutAsync(user))
-            {
-                return new LoginResponse
-                {
-                    IsSuccess = false,
-                    Message = "User account is locked",
-                    UserId = null
-                };
-
-            }
-            var passwordValid = await _userManager.CheckPasswordAsync(user, loginRequest.Password);
-            if (!passwordValid)
-            {
-                await _userManager.AccessFailedAsync(user);
-                return new LoginResponse
-                {
-                    IsSuccess = false,
-                    Message = "Invalid password",
-                    UserId = null
-                };
-            }
-            
-            // reset access failed count on success
-            await _userManager.ResetAccessFailedCountAsync(user);
-
-            if (await _userManager.IsLockedOutAsync(user))
-            {
-                return new LoginResponse
-                {
-                    IsSuccess = false,
-                    Message = "User account is locked",
-                    UserId = null
-                };
-            }
-
-            if (!await _userManager.IsEmailConfirmedAsync(user))
-            {
-                return new LoginResponse
-                {
-                    IsSuccess = false,
-                    Message = "Email not confirmed",
-                    UserId = null
-                };
-            }
-
-            return new LoginResponse
-            {
-                IsSuccess = true,
-                Message = "Login successful",
-                UserId = user.Id,
-                AccessToken = await GenerateAccessToken(user)
-            };
         }
         public async Task<RegisterResponse> RegisterAsync(RegisterUserRequest registerRequest)
         {
@@ -177,6 +217,9 @@ namespace MyApi.BLL.Service
         }
         private async Task<string> GenerateAccessToken(ApplicationUser user)
         {
+            var roles = await _userManager.GetRolesAsync(user);
+
+            //payload - Claims
             var UserClaims = new List<Claim>()
             {
 
@@ -184,7 +227,9 @@ namespace MyApi.BLL.Service
                 new Claim(ClaimTypes.Email, user.Email!),
                 new Claim(ClaimTypes.Name, user.UserName!),
 
+                new Claim(ClaimTypes.Role,string.Join(',',roles))
             };
+            // we need secret key to check
             var secret = _configuration["Jwt:SecretKey"] ?? throw new InvalidOperationException("Jwt:SecretKey is not configured");
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -226,6 +271,35 @@ namespace MyApi.BLL.Service
 
         public async Task<RestPasswordResponse> ResetPasswordAsync(ResetPasswordRequest request)
         {
+            if (string.IsNullOrWhiteSpace(request.Email))
+            {
+                return new RestPasswordResponse
+                {
+                    IsSuccess = false,
+                    Message = "Email is required",
+                    Errors = Array.Empty<string>()
+                };
+            }
+
+            if (string.IsNullOrWhiteSpace(request.ResetCode))
+            {
+                return new RestPasswordResponse
+                {
+                    IsSuccess = false,
+                    Message = "Reset code is required",
+                    Errors = Array.Empty<string>()
+                };
+            }
+
+            if (string.IsNullOrWhiteSpace(request.NewPassword))
+            {
+                return new RestPasswordResponse
+                {
+                    IsSuccess = false,
+                    Message = "New password is required",
+                    Errors = Array.Empty<string>()
+                };
+            }
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
             {
@@ -245,7 +319,7 @@ namespace MyApi.BLL.Service
                     Errors = Array.Empty<string>()
                 };
             }
-            else if(user.ExpireResetPassword < DateTime.UtcNow)
+            else if (user.ExpireResetPassword < DateTime.UtcNow)
             {
                 return new RestPasswordResponse
                 {
@@ -257,7 +331,7 @@ namespace MyApi.BLL.Service
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             var result = await _userManager.ResetPasswordAsync(user, token, request.NewPassword);
-            if(!result.Succeeded)
+            if (!result.Succeeded)
             {
                 return new RestPasswordResponse
                 {
@@ -276,6 +350,8 @@ namespace MyApi.BLL.Service
                     Errors = Array.Empty<string>()
                 };
             }
+            user.CodeResetPassword = null;
+            await _userManager.UpdateAsync(user);
             return new RestPasswordResponse
             {
                 IsSuccess = false,
@@ -283,11 +359,6 @@ namespace MyApi.BLL.Service
                 Errors = result.Errors.Select(e => e.Description)
             };
         }
-        
-           
-        
-
-
     }
 }
 

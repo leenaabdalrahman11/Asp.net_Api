@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using MyApi.BLL.Service;
@@ -18,9 +19,9 @@ public class CategoriesController : ControllerBase
         _category = category;
     }
     [HttpGet("")]
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        var response = _category.GetAll();
+        var response = await _category.GetAll();
         return Ok(new {Message="Success",response});
     }
 

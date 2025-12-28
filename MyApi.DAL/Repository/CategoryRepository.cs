@@ -19,20 +19,31 @@ public class CategoryRepository : ICategoryRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<Category>> GetAllAsync()
-    {
-        return await _context.Categories.ToListAsync();
-    }
-        public Category Create(Category Request)
+        public async Task<Category> CreateAsync(Category Request)
         {
-            _context.Categories.Add(Request);
-            _context.SaveChanges();
+            await _context.AddAsync(Request);
+            await _context.SaveChangesAsync();
             return Request;
         }
 
-        public List<Category> GetAll()
+        public async Task<List<Category>> GetAllAsync()
         {
-            return _context.Categories.Include(c=>c.Translations).ToList();
+            return await _context.Categories.Include(c=>c.Translations).Include(c=>c.User).ToListAsync();
+        }
+        public async Task<Category?> FindByIdAsync(int id)
+        {
+            return await _context.Categories.Include(c => c.Translations).FirstOrDefaultAsync(c=>c.Id == id);
+        }
+        public async Task DeleteAsync(Category category)
+        {
+            _context.Categories.Remove(category);
+            await _context.SaveChangesAsync();
+        }
+        public async Task<Category?> UpdateAsync(Category category)
+        {
+            _context.Categories.Update(category);
+            await _context.SaveChangesAsync();
+            return category;
         }
     }
 }
