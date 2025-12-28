@@ -13,6 +13,8 @@ using MyApi.DAL.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using MyApi.DAL.Utils;
 using MyApi.DAL.Repository;
+using MyApi.PLL;
+using MyApi.BLL.MapesterConfigurations;
 
 public class Program
 {
@@ -27,23 +29,23 @@ public class Program
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-        builder.Services.AddIdentity<ApplicationUser, IdentityRole>(Options =>
+        builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
         {
-            Options.User.RequireUniqueEmail = true;
-            Options.Password.RequireDigit = true;
-            Options.Password.RequireLowercase = true;
-            Options.Password.RequireUppercase = true;
-            Options.Password.RequireNonAlphanumeric = false;
-            Options.Password.RequiredLength = 6;
-            Options.SignIn.RequireConfirmedEmail = true;
+            options.User.RequireUniqueEmail = true;
+            options.Password.RequireDigit = true;
+            options.Password.RequireLowercase = true;
+            options.Password.RequireUppercase = true;
+            options.Password.RequireNonAlphanumeric = false;
+            options.Password.RequiredLength = 6;
+            options.SignIn.RequireConfirmedEmail = true;
 
-            Options.Lockout.MaxFailedAccessAttempts = 5;
-            Options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-            Options.SignIn.RequireConfirmedEmail = true;
+            options.Lockout.MaxFailedAccessAttempts = 5;
+            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+            options.SignIn.RequireConfirmedEmail = true;
         })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
-
+        //for change chalenge
         builder.Services.AddAuthentication(opt =>
         {
             opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -77,7 +79,7 @@ public class Program
             });
         });
 
-        builder.Services.AddSwaggerGen(c =>
+        /*builder.Services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new() { Title = "My API", Version = "v1" });
             c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
@@ -105,14 +107,10 @@ public class Program
             });
         }
 
-        );
+        );*/
 
-        builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-        builder.Services.AddScoped<ICategoryService, CategoryService>();
-        builder.Services.AddScoped<ISeedData, RoleSeedData>();
-        builder.Services.AddScoped<ISeedData, UserSeedData>();
-        builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
-        builder.Services.AddTransient<IEmailSender, EmailSender>();
+        AppConfigration.Config(builder.Services);
+        MapesterConfig.MapesterConfRegister();
         var app = builder.Build();
 
         app.UseRequestLocalization(app.Services.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value);

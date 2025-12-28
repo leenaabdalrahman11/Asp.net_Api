@@ -11,6 +11,7 @@ public class EmailSender : IEmailSender
 {
   public Task SendEmailAsync(string email, string subject, string htmlMessage)
   {
+    //smtp --> email address + Port number 
     var client = new SmtpClient("smtp.gmail.com", 587)
     {
       EnableSsl = true,
