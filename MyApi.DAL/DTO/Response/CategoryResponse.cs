@@ -11,6 +11,7 @@ namespace MyApi.DAL.DTO.Response
     {
 
         public int Id { get; set; }
+        public string UserCreated {get;set;}
         public Status Status { get; set; }
         public List<CategoryTranslationResponse>? Translations { get; set; }
     }

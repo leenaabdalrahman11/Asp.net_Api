@@ -10,7 +10,10 @@ namespace MyApi.BLL.Service
 {
     public interface ICategoryService
     {
-        List<CategoryResponse> GetAll();
-        CategoryResponse Create(CategoryRequest Request);
+        Task<List<CategoryResponse>> GetAll();
+        Task<CategoryResponse> CreateCategory(CategoryRequest Request);
+        Task<BaseResponse> DeleteCategoryAsync(int id);
+        Task<BaseResponse> ToggleStatus(int Id);
+        Task<BaseResponse> UpdateCategoryAsync(int id, CategoryRequest request);
     }
 }
