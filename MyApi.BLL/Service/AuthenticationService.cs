@@ -32,7 +32,9 @@ namespace MyApi.BLL.Service
         }
         public async Task<LoginResponse> LoginAsync(LoginRequest loginRequest)
         {
-            if (string.IsNullOrWhiteSpace(loginRequest.Email))
+            try
+            {
+                            if (string.IsNullOrWhiteSpace(loginRequest.Email))
             {
                 return new LoginResponse
                 {
@@ -82,7 +84,7 @@ namespace MyApi.BLL.Service
                     UserId = null
                 };
             }
-            
+
             // reset access failed count on success
             await _userManager.ResetAccessFailedCountAsync(user);
 
@@ -113,6 +115,19 @@ namespace MyApi.BLL.Service
                 UserId = user.Id,
                 AccessToken = await GenerateAccessToken(user)
             };
+                
+            }catch(Exception ex)
+            {
+                return new LoginResponse()
+                {
+                    IsSuccess = false,
+                    Message = "An error occurred during registration",
+                    UserId = null!,
+                    Errors = new List<string> { ex.Message }                    
+                    
+                };
+            }
+
         }
         public async Task<RegisterResponse> RegisterAsync(RegisterUserRequest registerRequest)
         {
@@ -226,6 +241,35 @@ namespace MyApi.BLL.Service
 
         public async Task<RestPasswordResponse> ResetPasswordAsync(ResetPasswordRequest request)
         {
+            if (string.IsNullOrWhiteSpace(request.Email))
+            {
+                return new RestPasswordResponse
+                {
+                    IsSuccess = false,
+                    Message = "Email is required",
+                    Errors = Array.Empty<string>()
+                };
+            }
+
+            if (string.IsNullOrWhiteSpace(request.ResetCode))
+            {
+                return new RestPasswordResponse
+                {
+                    IsSuccess = false,
+                    Message = "Reset code is required",
+                    Errors = Array.Empty<string>()
+                };
+            }
+
+            if (string.IsNullOrWhiteSpace(request.NewPassword))
+            {
+                return new RestPasswordResponse
+                {
+                    IsSuccess = false,
+                    Message = "New password is required",
+                    Errors = Array.Empty<string>()
+                };
+            }
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
             {
@@ -245,7 +289,7 @@ namespace MyApi.BLL.Service
                     Errors = Array.Empty<string>()
                 };
             }
-            else if(user.ExpireResetPassword < DateTime.UtcNow)
+            else if (user.ExpireResetPassword < DateTime.UtcNow)
             {
                 return new RestPasswordResponse
                 {
@@ -257,7 +301,7 @@ namespace MyApi.BLL.Service
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             var result = await _userManager.ResetPasswordAsync(user, token, request.NewPassword);
-            if(!result.Succeeded)
+            if (!result.Succeeded)
             {
                 return new RestPasswordResponse
                 {
@@ -283,9 +327,9 @@ namespace MyApi.BLL.Service
                 Errors = result.Errors.Select(e => e.Description)
             };
         }
-        
-           
-        
+
+
+
 
 
     }
