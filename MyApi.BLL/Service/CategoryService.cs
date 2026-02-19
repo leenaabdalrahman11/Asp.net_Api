@@ -6,39 +6,60 @@ using System.Text;
 using System.Threading.Tasks;
 using MyApi.DAL.Repository;
 using MyApi.DAL.Models;
+using Microsoft.AspNetCore.Http;
 using MyApi.DAL.DTO.Response;
 using Mapster;
 using MyApi.DAL.DTO.Requests;
+using System.Security.Claims;
 
 namespace MyApi.BLL.Service
 {
     public class CategoryService : ICategoryService
     {
         private readonly ICategoryRepository _categoryRepository;
-        public CategoryService(DAL.Repository.ICategoryRepository categoryRepository)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public CategoryService(DAL.Repository.ICategoryRepository categoryRepository, IHttpContextAccessor httpContextAccessor)
         {
             _categoryRepository = categoryRepository;
+            _httpContextAccessor = httpContextAccessor;
         }
-        public async Task<CategoryResponse> CreateCategory(CategoryRequest Request)
+        public async Task<CategoryResponse> CreateCategory(CategoryRequest request, string? userId)
         {
-            var category = Request.Adapt<Category>();
+            var category = request.Adapt<Category>();
+
+            category.Status = Status.Active;
+            category.CreatedAt = DateTime.UtcNow;
+            category.CreatedBy = userId;
+
+
             await _categoryRepository.CreateAsync(category);
-            return category.Adapt<CategoryResponse>();
+
+            return new CategoryResponse
+            {
+                Id = category.Id,
+                Status = category.Status,
+                CreatedBy = category.CreatedBy ?? string.Empty,
+                Translations = request.Translations.Select(t => new CategoryTranslationResponse
+                {
+                    Name = t.Name,
+                    Language = t.Language
+                }).ToList()
+            };
         }
 
         public async Task<List<CategoryResponse>> GetAll()
         {
-            var categories =await _categoryRepository.GetAllAsync();
+            var categories = await _categoryRepository.GetAllAsync();
             var response = categories.Adapt<List<CategoryResponse>>();
-
+            
             return response;
         }
-        public async Task<BaseResponse> UpdateCategoryAsync(int id,CategoryRequest request)
+        public async Task<BaseResponse> UpdateCategoryAsync(int id, CategoryRequest request)
         {
             try
             {
                 var category = await _categoryRepository.FindByIdAsync(id);
-                if(category is null)
+                if (category is null)
                 {
                     return new BaseResponse
                     {
@@ -46,24 +67,25 @@ namespace MyApi.BLL.Service
                         Message = "category Not Found"
                     };
                 }
-                if(request.Translations != null)
+                if (request.Translations != null)
                 {
-                    foreach(var translation in request.Translations)
+                    foreach (var translation in request.Translations)
                     {
-                        var existing = category.Translations.FirstOrDefault(t=>t.Language == translation.Language);
-                        if(existing is not null)
+                        var existing = category.Translations?.FirstOrDefault(t => t.Language == translation.Language);
+                        if (existing is not null)
                         {
                             existing.Name = translation.Name;
                         }
                         else
                         {
-                            category.Translations.Add(new CategoryTranslation{
+                            category.Translations?.Add(new CategoryTranslation
+                            {
                                 Name = translation.Name,
                                 Language = translation.Language,
                             });
                         }
                     }
-                    
+
                 }
                 await _categoryRepository.UpdateAsync(category);
                 return new BaseResponse
@@ -75,7 +97,7 @@ namespace MyApi.BLL.Service
             }
             catch (Exception ex)
             {
-              return  new BaseResponse
+                return new BaseResponse
                 {
                     IsSuccess = false,
                     Message = "Can't Update Category",
@@ -101,16 +123,16 @@ namespace MyApi.BLL.Service
                 }
                 category.Status = category.Status == Status.Active ? Status.InActive : Status.Active;
                 await _categoryRepository.UpdateAsync(category);
-                                    return new BaseResponse
-                    {
-                        IsSuccess = true,
-                        Message = "category Updated Succesfully"
-                    };
+                return new BaseResponse
+                {
+                    IsSuccess = true,
+                    Message = "category Updated Succesfully"
+                };
 
             }
             catch (Exception ex)
             {
-              return  new BaseResponse
+                return new BaseResponse
                 {
                     IsSuccess = false,
                     Message = "can't delete Category",
@@ -145,7 +167,7 @@ namespace MyApi.BLL.Service
             }
             catch (Exception ex)
             {
-              return  new BaseResponse
+                return new BaseResponse
                 {
                     IsSuccess = false,
                     Message = "can't delete Category",

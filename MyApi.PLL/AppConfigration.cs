@@ -20,6 +20,9 @@ public static class AppConfigration
         Services.AddScoped<ISeedData, UserSeedData>();
         Services.AddScoped<IAuthenticationService, AuthenticationService>();
         Services.AddTransient<MyApi.BLL.Service.IEmailSender, MyApi.BLL.Service.EmailSender>();
+        Services.AddTransient<IFileService, FileService>();
+        Services.AddScoped<IProductRepository, ProductRepository>();
+        Services.AddScoped<IProductService, ProductService>();
     }
     
 }

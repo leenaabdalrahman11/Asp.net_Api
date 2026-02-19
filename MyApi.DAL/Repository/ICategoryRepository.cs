@@ -14,6 +14,8 @@ namespace MyApi.DAL.Repository
         Task<Category?> FindByIdAsync(int id);
         Task DeleteAsync(Category category);
         Task<Category?> UpdateAsync(Category category);
+        Task<Category?> GetByIdAsync(int id);
+
 
     }
 }

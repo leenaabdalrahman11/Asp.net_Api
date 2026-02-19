@@ -229,6 +229,10 @@ namespace MyApi.BLL.Service
 
                 new Claim(ClaimTypes.Role,string.Join(',',roles))
             };
+                foreach (var role in roles)
+    {
+        UserClaims.Add(new Claim(ClaimTypes.Role, role));
+    }
             // we need secret key to check
             var secret = _configuration["Jwt:SecretKey"] ?? throw new InvalidOperationException("Jwt:SecretKey is not configured");
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));

@@ -23,7 +23,6 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         builder.Services.AddControllers();
-        builder.Services.AddOpenApi();
         builder.Services.AddLocalization(options => options.ResourcesPath = "");
 
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -45,7 +44,6 @@ public class Program
         })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
-        //for change chalenge
         builder.Services.AddAuthentication(opt =>
         {
             opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -106,10 +104,13 @@ public class Program
                 }
             });
         }
-
         );*/
 
         AppConfigration.Config(builder.Services);
+
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
+
         MapesterConfig.MapesterConfRegister();
         var app = builder.Build();
 
@@ -117,7 +118,6 @@ public class Program
 
         if (app.Environment.IsDevelopment())
         {
-            app.MapOpenApi();
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
@@ -125,7 +125,7 @@ public class Program
                 c.RoutePrefix = "swagger";
             });
         }
-
+        app.UseStaticFiles();
         app.UseHttpsRedirection();
         app.UseAuthentication();
         app.UseAuthorization();

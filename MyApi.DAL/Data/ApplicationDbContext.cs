@@ -22,7 +22,9 @@ namespace MyApi.DAL.Data
 
         public DbSet<Category> Categories { get; set; } = null!;
         public DbSet<CategoryTranslation> CategoryTranslations { get; set; } = null!;
-
+        public DbSet<Product> Products { get; set; } = null!;
+        public DbSet<ProductTranslation> ProductTranslations { get; set; } = null!;
+        public DbSet<ProductImage> ProductImages { get; set; } = null!;
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -47,13 +49,19 @@ namespace MyApi.DAL.Data
 
             modelBuilder.Entity<IdentityUserToken<string>>()
                         .ToTable("UserTokens");
+            modelBuilder.Entity<Category>()
+                        .HasOne(c => c.User)
+                        .WithMany()
+                        .HasForeignKey(c => c.CreatedBy)
+                        .OnDelete(DeleteBehavior.NoAction);
         }
         
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-             var entries = ChangeTracker.Entries<BaseModel>();
+          var entries = ChangeTracker.Entries<BaseModel>();
+          if(_httpContextAccessor is not null)
+            {
             var currentUserId = _httpContextAccessor?.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
-
             foreach (var entityEntry in entries)
             {
                 if (entityEntry.State == EntityState.Added)
@@ -67,8 +75,10 @@ namespace MyApi.DAL.Data
                     entityEntry.Property(x => x.UpdatedAt).CurrentValue = DateTime.UtcNow;
                 }
             }
-            return base.SaveChangesAsync(cancellationToken);
+         }
+        return base.SaveChangesAsync(cancellationToken);
         }
+
         public override int SaveChanges()
         {
             var entries = ChangeTracker.Entries<BaseModel>();
@@ -88,8 +98,6 @@ namespace MyApi.DAL.Data
 
                 }
             }
-
-
             return base.SaveChanges();
         }
     }
