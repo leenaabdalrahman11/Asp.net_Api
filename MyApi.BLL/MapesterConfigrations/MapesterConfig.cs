@@ -38,6 +38,7 @@ public static class MapesterConfig
            .Map(dest => dest.Description, source => source.Translations.
             Where(t => t.Language == MapContext.Current.Parameters["lang"].ToString())
             .Select(t => t.Description).FirstOrDefault());
+        
         }
     }
 

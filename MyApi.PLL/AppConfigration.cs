@@ -23,6 +23,9 @@ public static class AppConfigration
         Services.AddTransient<IFileService, FileService>();
         Services.AddScoped<IProductRepository, ProductRepository>();
         Services.AddScoped<IProductService, ProductService>();
+        Services.AddScoped<ICartRepository, CartRepository>();
+        Services.AddScoped<ICartService, CartService>();
+   
     }
     
 }
