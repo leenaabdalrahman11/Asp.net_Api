@@ -15,9 +15,10 @@ public class CheckoutService : ICheckoutService
 	private readonly UserManager<ApplicationUser> _userManager;
 	private readonly IEmailSender _emailSender;
 	private readonly IOrderItemRepository _orderItemRepository;
+	private readonly IProductRepository _productRepository;
 	public CheckoutService(ICartRepository cartRepository, IOrderRepository orderRepository,
 	UserManager<ApplicationUser> userManager, IEmailSender emailSender,
-	IOrderItemRepository orderItemRepository)
+	IOrderItemRepository orderItemRepository, IProductRepository productRepository)
 	{
 		_cartRepository = cartRepository;
 		_orderRepository = orderRepository;
@@ -25,6 +26,7 @@ public class CheckoutService : ICheckoutService
 		_emailSender = emailSender;
 		_orderItemRepository = orderItemRepository;
 		_orderItemRepository = orderItemRepository;
+		_productRepository = productRepository;
 	}
 	public async Task<CheckoutResponse> ProccesPaymentAsync(CheckoutRequest request, string userId)
 	{
@@ -140,7 +142,7 @@ public class CheckoutService : ICheckoutService
 		var user = await _userManager.FindByIdAsync(userId);
 		var CartItems = await _cartRepository.GetCartItemsByUserIdAsync(userId);
 		var orderItems = new List<OrderItem>();
-
+		var productUpdated = new List<(int productId, int quantity)>();
 		foreach (var item in CartItems)	{
 			var orderItem = new OrderItem
 			{
@@ -151,9 +153,12 @@ public class CheckoutService : ICheckoutService
 				TotalPrice = item.Product.Price * item.Count
 			};
 			orderItems.Add(orderItem);
+			productUpdated.Add((item.ProductId, item.Count));
 		}
 		await _orderItemRepository.CreateRangeAsync(orderItems);
 		await _cartRepository.ClearCartAsync(userId);
+		await _productRepository.DecreaseQuantityAsync(productUpdated);
+
 		await _emailSender.SendEmailAsync(user.Email, "Order Confirmation", "<h2>Your order has been confirmed!</h2><p>Thank you for your purchase.</p>");
 
 		return new CheckoutResponse
