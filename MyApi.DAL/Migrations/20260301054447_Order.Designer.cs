@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyApi.DAL.Data;
 
@@ -11,9 +12,11 @@ using MyApi.DAL.Data;
 namespace MyApi.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260301054447_Order")]
+    partial class Order
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -569,8 +572,7 @@ namespace MyApi.DAL.Migrations
                 {
                     b.HasOne("MyApi.DAL.Models.ApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .HasForeignKey("UserId");
 
                     b.Navigation("User");
                 });
@@ -580,7 +582,7 @@ namespace MyApi.DAL.Migrations
                     b.HasOne("MyApi.DAL.Models.Order", "order")
                         .WithMany("OrderItems")
                         .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("MyApi.DAL.Models.Product", "product")
@@ -604,8 +606,7 @@ namespace MyApi.DAL.Migrations
 
                     b.HasOne("MyApi.DAL.Models.ApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .HasForeignKey("CreatedBy");
 
                     b.Navigation("Category");
 

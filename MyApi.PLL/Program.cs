@@ -22,6 +22,8 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+        var cs = builder.Configuration.GetConnectionString("DefaultConnection");
+Console.WriteLine($"DefaultConnection from config = '{cs}'");
 
         builder.Services.AddControllers();
         builder.Services.AddLocalization(options => options.ResourcesPath = "");

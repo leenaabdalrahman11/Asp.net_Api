@@ -26,6 +26,8 @@ namespace MyApi.DAL.Data
         public DbSet<ProductTranslation> ProductTranslations { get; set; } = null!;
         public DbSet<ProductImage> ProductImages { get; set; } = null!;
         public DbSet<Cart> Carts { get; set; } = null!;
+        public DbSet<Order> Orders { get; set; } = null!;
+        public DbSet<OrderItem> OrderItems { get; set; } = null!;
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -59,6 +61,21 @@ namespace MyApi.DAL.Data
                         .HasOne(c => c.User)
                         .WithMany()
                         .HasForeignKey(c => c.UserId)
+                        .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<Product>()
+                        .HasOne(c => c.User)
+                        .WithMany()
+                        .HasForeignKey(c => c.CreatedBy)
+                        .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<Order>()
+                        .HasOne(c => c.User)
+                        .WithMany()
+                        .HasForeignKey(c => c.UserId)
+                        .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<OrderItem>()
+                        .HasOne(c => c.order)
+                        .WithMany(o => o.OrderItems)
+                        .HasForeignKey(c => c.OrderId)
                         .OnDelete(DeleteBehavior.NoAction);
         }
         
