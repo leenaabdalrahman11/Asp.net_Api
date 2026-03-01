@@ -15,6 +15,7 @@ using MyApi.DAL.Utils;
 using MyApi.DAL.Repository;
 using MyApi.PLL;
 using MyApi.BLL.MapesterConfigurations;
+using Stripe;
 
 public class Program
 {
@@ -112,6 +113,11 @@ public class Program
         builder.Services.AddSwaggerGen();
 
         MapesterConfig.MapesterConfRegister();
+        builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+        builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("stripe"));
+        StripeConfiguration.ApiKey =builder.Configuration["stripe:secretKey"];
+        builder.Services.AddScoped<ICartRepository, CartRepository>();
         var app = builder.Build();
 
         app.UseRequestLocalization(app.Services.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value);
