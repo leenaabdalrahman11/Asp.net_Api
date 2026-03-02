@@ -19,17 +19,18 @@ namespace MyApi.PLL.Areas.User
     }
     
     [HttpGet("")]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index([FromQuery] string lang="en", [FromQuery] int page = 1, [FromQuery] int limit = 3, [FromQuery] string? search = null)
     {
-        var response = await _productService.GetAllProductsForUser();
+        var response = await _productService.GetAllProductsForUser(lang,page,limit,search);
         return Ok(new { message = _localizer["Success"].Value, response });
     }
         [HttpGet("{id}")]
-    public async Task<IActionResult> Details([FromRoute] int id, [FromQuery] string lang="en")
+    public async Task<IActionResult> Details([FromRoute] int id, [FromQuery] string lang="en", [FromQuery] int page = 1, [FromQuery] int limit = 3)
     {
         var response = await _productService.GetProductsDetailsForUser(id, lang);
         return Ok(new { message = _localizer["Success"].Value, response });
     }
+    
 
     }
 }

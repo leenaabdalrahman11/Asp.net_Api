@@ -29,7 +29,10 @@ public class ProductRepository : IProductRepository
         return await _context.Products.Include(p => p.Translations)
         .FirstOrDefaultAsync(p => p.Id == id);
     }
-
+    public IQueryable<Product> Query() // Ram
+    {
+        return _context.Products.Include(p => p.Translations).AsQueryable(); // server Ram
+    }
     public async Task<bool> DecreaseQuantityAsync(List<(int productId, int quantity)> items)
     {
         var productIds = items.Select(i => i.productId).ToList();

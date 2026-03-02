@@ -10,4 +10,5 @@ public interface IProductRepository
     Task<List<Product>> GetAllAsync(); 
     Task<bool> DecreaseQuantityAsync(List<(int productId, int quantity)> items);
     Task<Product?> FindByIdAsync(int id);     
+    IQueryable<Product> Query();
 }

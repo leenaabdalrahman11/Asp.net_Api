@@ -1,5 +1,6 @@
 using System;
 using Mapster;
+using Microsoft.EntityFrameworkCore;
 using MyApi.BLL.Service;
 using MyApi.DAL.Data;
 using MyApi.DAL.DTO.Requests;
@@ -31,7 +32,7 @@ public class ProductService : IProductService
         product.CreatedBy = userId;
         if (request.MainImage != null)
         {
-            var imageUrl =await _fileService.UploadAsync(request.MainImage);
+            var imageUrl = await _fileService.UploadAsync(request.MainImage);
             product.MainImage = imageUrl;
         }
         if (request.SubImages != null)
@@ -59,19 +60,28 @@ public class ProductService : IProductService
     {
         throw new NotImplementedException();
     }
-    public async Task<List<ProductUserResponse>> GetAllProductsForUser()
+    
+    public async Task<List<ProductUserResponse>> GetAllProductsForUser(string lang ="en"
+    ,int page = 1,int limit = 3,string? search =null)
     {
-        var products = await _productRepository.GetAllAsync();
-        var response = products.BuildAdapter().AddParameters("lang", "en").AdaptToType<List<ProductUserResponse>>();
+        var query = _productRepository.Query();
+
+        if(search is not null)
+        {
+            query = query.Where(p => p.Translations.Any(t=>t.Language == lang && t.Name.Contains(search) || t.Description.Contains(search)));
+        }
+        var totalCount =await query.CountAsync();
+        query = query.Skip((page - 1) * limit).Take(limit);
+        var response = query.BuildAdapter().AddParameters("lang", lang).AdaptToType<List<ProductUserResponse>>();
         return response;
     }
-        public async Task<ProductUserDetails> GetProductsDetailsForUser(int id, string lang = "en")
+    public async Task<ProductUserDetails> GetProductsDetailsForUser(int id, string lang = "en")
     {
         var products = await _productRepository.FindByIdAsync(id);
         var response = products.BuildAdapter().AddParameters("lang", lang).AdaptToType<ProductUserDetails>();
         return response;
     }
-   
+
     public Task<List<ProductResponse>> GetAll()
     {
         throw new NotImplementedException();
@@ -86,4 +96,5 @@ public class ProductService : IProductService
     {
         throw new NotImplementedException();
     }
+
 }
