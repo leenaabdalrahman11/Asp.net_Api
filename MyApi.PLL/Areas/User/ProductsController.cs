@@ -19,9 +19,13 @@ namespace MyApi.PLL.Areas.User
     }
     
     [HttpGet("")]
-    public async Task<IActionResult> Index([FromQuery] string lang="en", [FromQuery] int page = 1, [FromQuery] int limit = 3, [FromQuery] string? search = null)
+    public async Task<IActionResult> Index([FromQuery] string lang="en", [FromQuery] int page = 1, 
+    [FromQuery] int limit = 3, [FromQuery] string? search = null, [FromQuery] int? categoryId = null,
+     [FromQuery] decimal? minPrice = null, [FromQuery] decimal? maxPrice = null, 
+     [FromQuery] decimal? minRate = null, [FromQuery] decimal? maxRate = null, [FromQuery] string? sortBy = null, [FromQuery] bool asc = true)
     {
-        var response = await _productService.GetAllProductsForUser(lang,page,limit,search);
+        var response = await _productService.GetAllProductsForUser(lang, page, limit, search, 
+        categoryId, minPrice, maxPrice, minRate, maxRate, sortBy, asc);
         return Ok(new { message = _localizer["Success"].Value, response });
     }
         [HttpGet("{id}")]
@@ -30,7 +34,5 @@ namespace MyApi.PLL.Areas.User
         var response = await _productService.GetProductsDetailsForUser(id, lang);
         return Ok(new { message = _localizer["Success"].Value, response });
     }
-    
-
     }
 }

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using MyApi.BLL.Service;
 using MyApi.DAL.DTO.Requests;
+using MyApiProject.MyApi.DAL.DTO.Requests;
 
 namespace MyApi.PLL.Areas.User
 {
@@ -41,6 +42,20 @@ namespace MyApi.PLL.Areas.User
             var result = await _cartService.GetUserCartAsync(userId);
             return Ok(result);
         }
+                [HttpPatch("{id}")]
+        public async Task<IActionResult> UpdateQuantity([FromRoute] int id, [FromBody] UpdateQuantityRequest request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _cartService.UpdateQuantityAsync(userId, id, request.Count);
+            if (result.IsSuccess)
+            {
+                return Ok(new { message = _localizer["Cart updated successfully"].Value, result });
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
         [HttpDelete("")]
         public async Task<IActionResult> ClearCart()
         {
@@ -55,5 +70,21 @@ namespace MyApi.PLL.Areas.User
                 return BadRequest(result);
             }
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteFromCart([FromRoute] int id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _cartService.RemoveFromCartAsync(id, userId);
+            if (result.IsSuccess)
+            {
+                return Ok(new { message = _localizer["Product removed from cart successfully"].Value, result });
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        } 
+
     }
 }

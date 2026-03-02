@@ -61,8 +61,10 @@ public class ProductService : IProductService
         throw new NotImplementedException();
     }
     
-    public async Task<List<ProductUserResponse>> GetAllProductsForUser(string lang ="en"
-    ,int page = 1,int limit = 3,string? search =null)
+    public async Task<PaginatResponse<ProductUserResponse>> GetAllProductsForUser(string lang ="en"
+    ,int page = 1,int limit = 3,string? search =null, int? categoryId = null , decimal ? minPrice = null,
+     decimal? maxPrice = null, decimal? minRate = null, decimal? maxRate = null,
+     string? sortBy = null, bool asc = true)
     {
         var query = _productRepository.Query();
 
@@ -70,10 +72,59 @@ public class ProductService : IProductService
         {
             query = query.Where(p => p.Translations.Any(t=>t.Language == lang && t.Name.Contains(search) || t.Description.Contains(search)));
         }
+        if(categoryId is not null)
+        {
+            query = query.Where(p => p.CategoryId == categoryId);
+        }
+        if(minPrice is not null)
+        {
+            query = query.Where(p => p.Price >= minPrice);
+        }
+        if(maxPrice is not null)
+        {
+            query = query.Where(p => p.Price <= maxPrice);
+        }
+        if(minRate is not null)
+        {
+            query = query.Where(p => p.Rate >= minRate);
+        }
+        if(maxRate is not null)
+        {
+            query = query.Where(p => p.Rate <= maxRate);
+        }
+        if(sortBy is not null)
+        {
+            sortBy = sortBy.ToLower();
+            if(sortBy == "price")
+            {
+                query = asc ? query.OrderBy(p => p.Price) : query.OrderByDescending(p => p.Price);
+            }
+            else if(sortBy == "name")
+            {
+                query = asc ? query.OrderBy(p => p.Translations.FirstOrDefault(t => t.Language == lang).Name) 
+                : query.OrderByDescending(p => p.Translations.FirstOrDefault(t => t.Language == lang).Name);
+            }
+            else if(sortBy == "rate")
+            {
+                query = asc ? query.OrderBy(p => p.Rate) : query.OrderByDescending(p => p.Rate);
+            }
+            else if(sortBy == "createdAt")
+            {
+                query = asc ? query.OrderBy(p => p.CreatedAt) : query.OrderByDescending(p => p.CreatedAt);
+            }
+        }
         var totalCount =await query.CountAsync();
         query = query.Skip((page - 1) * limit).Take(limit);
         var response = query.BuildAdapter().AddParameters("lang", lang).AdaptToType<List<ProductUserResponse>>();
-        return response;
+        
+        return 
+            new PaginatResponse<ProductUserResponse>
+            {
+                TotalCount = totalCount,
+                Page = page,
+                Limit = limit,
+                Data = response
+        };
     }
     public async Task<ProductUserDetails> GetProductsDetailsForUser(int id, string lang = "en")
     {

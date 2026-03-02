@@ -37,4 +37,8 @@
     <ProjectReference Include="..\MyApi.DAL\MyApi.DAL.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="MyApi.PLL\Middleware\" />
+  </ItemGroup>
+
 </Project>

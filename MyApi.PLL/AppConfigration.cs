@@ -7,6 +7,7 @@ using MyApi.BLL.Service;
 using MyApi.DAL.Repository;
 using MyApi.DAL.Utils;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using MyApiProject.MyApi.PLL;
 
 namespace MyApi.PLL;
 
@@ -28,6 +29,8 @@ public static class AppConfigration
         Services.AddScoped<ICheckoutService, CheckoutService>();
         Services.AddScoped<IOrderRepository, OrderRepository>();
         Services.AddScoped<IOrderItemRepository, OrderItemRepository>();
+        Services.AddExceptionHandler<GlobalExceptionHandler>();
+        Services.AddProblemDetails();
     }
     
 }

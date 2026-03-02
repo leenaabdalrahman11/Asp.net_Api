@@ -16,6 +16,7 @@ using MyApi.DAL.Repository;
 using MyApi.PLL;
 using MyApi.BLL.MapesterConfigurations;
 using Stripe;
+using MyApiProject.MyApi.PLL.Middleware;
 
 public class Program
 {
@@ -133,6 +134,8 @@ Console.WriteLine($"DefaultConnection from config = '{cs}'");
                 c.RoutePrefix = "swagger";
             });
         }
+
+        app.UseExceptionHandler();
         app.UseStaticFiles();
         app.UseHttpsRedirection();
         app.UseAuthentication();
@@ -153,6 +156,7 @@ Console.WriteLine($"DefaultConnection from config = '{cs}'");
         }
 
         app.MapControllers();
+
         app.Run();
     }
 }
