@@ -5,6 +5,7 @@ namespace MyApi.BLL.Service;
 using MyApi.DAL.DTO.Response;
 using MyApi.DAL.DTO.Requests;
 using MyApi.DAL.Models;
+using Stripe;
 using Stripe.Checkout;
 using Microsoft.AspNetCore.Identity;
 
@@ -59,6 +60,7 @@ public class CheckoutService : ICheckoutService
 			UserId = userId,
 			paymentMethod = request.PaymentMethod,
 			AmountPaid = totalAmount,
+			PaymentStatus = PaymentStatus.Unpaid,
 		};
 		if (request.PaymentMethod == PaymentMethod.Cash)
 		{
@@ -103,6 +105,7 @@ public class CheckoutService : ICheckoutService
 			var service = new SessionService();
 			var session = service.Create(options);
 			order.SessionId = session.Id;
+			order.PaymentStatus = PaymentStatus.Paid;
 			await _orderRepository.CreateOrderAsync(order);
 			return new CheckoutResponse
 			{

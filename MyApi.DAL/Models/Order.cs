@@ -15,6 +15,12 @@ public enum PaymentMethod
     Cash=1,
     Visa=2
 }
+public enum PaymentStatus
+{
+    Unpaid=1,
+    Paid=2,
+    Failed=3
+}
 public class Order
 {
     public int Id { get; set; }
@@ -22,6 +28,7 @@ public class Order
     public string? UserId { get; set; }
     public ApplicationUser? User { get; set; }
     public PaymentMethod paymentMethod {get;set;}
+    public PaymentStatus PaymentStatus {get;set;}
     public  string? SessionId {get;set;}
 
     public string? PaymentId {get;set;}
