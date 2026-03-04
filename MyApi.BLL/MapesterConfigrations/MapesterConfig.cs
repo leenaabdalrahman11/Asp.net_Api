@@ -41,6 +41,8 @@ public static class MapesterConfig
 
             TypeAdapterConfig<Order,OrderResponse>.NewConfig()
             .Map(dest => dest.userName,source => source.User.UserName);
+                    TypeAdapterConfig<Reviews,ReviewResponse>.NewConfig()
+            .Map(dest => dest.FullName,source => source.User.FullName);
         
         }
     }

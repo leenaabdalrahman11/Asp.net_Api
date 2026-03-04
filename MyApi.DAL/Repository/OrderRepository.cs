@@ -35,6 +35,13 @@ public class OrderRepository : IOrderRepository
         .FirstOrDefaultAsync(o => o.Id == orderId);
 
     }
+    public async Task<bool> HasUserDeliveredOrdersAsync(string userId , int productId)
+    {
+        return await _context.Orders
+        .Where(o => o.UserId == userId && o.OrderStatus == OrderStatus.Delivered)
+        .SelectMany(o=>o.OrderItems)
+        .AnyAsync(oi => oi.ProductId == productId);
+    }
 
     public Task<List<Order>> GetOrdersByStatusAsync(OrderStatus status)
     {

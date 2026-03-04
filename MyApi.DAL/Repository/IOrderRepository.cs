@@ -9,5 +9,6 @@ public interface IOrderRepository
     Task<Order?> GetBySessionIdAsync(string sessionId);
     Task<Order?> UpdateAsync(Order order);
     Task<List<Order>> GetOrdersByStatusAsync(OrderStatus status);
+     Task<bool> HasUserDeliveredOrdersAsync(string userId , int productId);
     Task<Order?> GetOrderByIdAsync(int orderId);
 }

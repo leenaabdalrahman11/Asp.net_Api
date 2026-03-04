@@ -27,6 +27,8 @@ public class ProductRepository : IProductRepository
     public async Task<Product?> FindByIdAsync(int id)
     {
         return await _context.Products.Include(p => p.Translations)
+        .Include(p=>p.SubImages)
+        .Include(p=>p.Reviews).ThenInclude(r=>r.User)
         .FirstOrDefaultAsync(p => p.Id == id);
     }
     public IQueryable<Product> Query() // Ram

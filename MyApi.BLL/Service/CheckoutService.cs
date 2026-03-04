@@ -62,7 +62,7 @@ public class CheckoutService : ICheckoutService
 			AmountPaid = totalAmount,
 			PaymentStatus = PaymentStatus.Unpaid,
 		};
-		if (request.PaymentMethod == PaymentMethod.Cash)
+		if (request.PaymentMethod == DAL.Models.PaymentMethod.Cash)
 		{
 			return new CheckoutResponse
 			{
@@ -70,7 +70,7 @@ public class CheckoutService : ICheckoutService
 				Message = "Cash on delivery selected.",
 			};
 		}
-		else if (request.PaymentMethod == PaymentMethod.Visa)
+		else if (request.PaymentMethod == DAL.Models.PaymentMethod.Visa)
 		{
 			var options = new SessionCreateOptions
 			{

@@ -16,5 +16,6 @@ public class Product : BaseModel
     public Category Category { get; set; }
     public List<ProductTranslation> Translations { get; set; }
     public DateTime CreatedAt { get; set; }
-    public IEnumerable<ProductImage> SubImages { get; set; } = new List<ProductImage>();
+    public List<ProductImage> SubImages { get; set; }
+    public List<Reviews> Reviews { get; set; }
 }
