@@ -30,6 +30,9 @@ public static class AppConfigration
         Services.AddScoped<ICheckoutService, CheckoutService>();
         Services.AddScoped<IOrderRepository, OrderRepository>();
         Services.AddScoped<IOrderService, OrderService>();
+        Services.AddScoped<IManageUserService, ManageUserService>();
+        Services.AddScoped<IReviewRepository, ReviewRepository>();
+        Services.AddScoped<IReviewService, ReviewService>();
         Services.AddScoped<IOrderItemRepository, OrderItemRepository>();
         Services.AddExceptionHandler<GlobalExceptionHandler>();
         Services.AddProblemDetails();

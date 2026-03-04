@@ -34,5 +34,6 @@ public class ProductController : ControllerBase
 
         return Ok(new { message = _localizer["Success"].Value, response });
     }
+
 }
 
