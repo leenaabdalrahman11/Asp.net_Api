@@ -14,6 +14,8 @@ namespace MyApi.DAL.Models
         public string? City { get; set; }
         public string? CodeResetPassword { get; set; }
         public DateTime? ExpireResetPassword { get; set; }
+        public string? RefreshToken { get; set; }
+        public DateTime? RefreshTokenExpiryTime { get; set; }
 
         
     }

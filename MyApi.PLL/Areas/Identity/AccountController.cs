@@ -76,7 +76,7 @@ namespace MyApi.PLL.Areas.Identity
             }
         }
         [HttpPatch("resetPassword")]
-        public async Task<IActionResult> ResetPassword( ResetPasswordRequest dto)
+        public async Task<IActionResult> ResetPassword(ResetPasswordRequest dto)
         {
             var result = await _authenticationService.ResetPasswordAsync(dto);
             if (result.IsSuccess)
@@ -88,6 +88,19 @@ namespace MyApi.PLL.Areas.Identity
                 return BadRequest(result);
             }
         }
-    }
+        [HttpPatch("refreshToken")]
+        public async Task<IActionResult> RefreshToken(TokenApiModelRequest request)
+        {
+            var result = await _authenticationService.RefreshTokenAsync(request);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
 
+    }
 }

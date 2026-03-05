@@ -33,6 +33,7 @@ public static class AppConfigration
         Services.AddScoped<IManageUserService, ManageUserService>();
         Services.AddScoped<IReviewRepository, ReviewRepository>();
         Services.AddScoped<IReviewService, ReviewService>();
+        Services.AddScoped<ITokenService, TokenService>();
         Services.AddScoped<IOrderItemRepository, OrderItemRepository>();
         Services.AddExceptionHandler<GlobalExceptionHandler>();
         Services.AddProblemDetails();

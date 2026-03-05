@@ -15,5 +15,7 @@ namespace MyApi.BLL.Service
         Task<string> ConfirmEmailAsync(string userId, string token);
         Task<ForgotPasswordResponse> RequestPasswordResetAsync(ForgotPasswordRequest request);
          Task<RestPasswordResponse> ResetPasswordAsync(ResetPasswordRequest request);
+    Task<LoginResponse> RefreshTokenAsync(TokenApiModelRequest request);
+        
     }
 }
