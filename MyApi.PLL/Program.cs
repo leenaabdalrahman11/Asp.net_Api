@@ -24,6 +24,17 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         var cs = builder.Configuration.GetConnectionString("DefaultConnection");
+        var  MyAllowSpecificOrigins = "_myAllowOrigins";
+        builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                      policy  =>
+                      {
+                          policy.AllowAnyOrigin()
+                                .AllowAnyMethod()
+                                .AllowAnyHeader();
+                      });
+});
 Console.WriteLine($"DefaultConnection from config = '{cs}'");
 
         builder.Services.AddControllers();
@@ -117,9 +128,9 @@ Console.WriteLine($"DefaultConnection from config = '{cs}'");
 
         MapesterConfig.MapesterConfRegister();
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-        builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("stripe"));
-        StripeConfiguration.ApiKey =builder.Configuration["stripe:secretKey"];
+            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),sql => sql.EnableRetryOnFailure()));
+        builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
+        StripeConfiguration.ApiKey =builder.Configuration["Stripe:SecretKey"];
         builder.Services.AddScoped<ICartRepository, CartRepository>();
         var app = builder.Build();
 
@@ -134,7 +145,7 @@ Console.WriteLine($"DefaultConnection from config = '{cs}'");
                 c.RoutePrefix = "swagger";
             });
         }
-
+        app.UseCors(MyAllowSpecificOrigins);
         app.UseExceptionHandler();
         app.UseStaticFiles();
         app.UseHttpsRedirection();

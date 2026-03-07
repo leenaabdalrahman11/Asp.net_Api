@@ -34,6 +34,21 @@ public class ProductController : ControllerBase
 
         return Ok(new { message = _localizer["Success"].Value, response });
     }
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete([FromRoute] int id)
+    {
+        var response = await _productService.DeleteProductAsync(id);
+        if (!response.IsSuccess) return BadRequest(response);
+        return Ok(new { message = _localizer["Success"].Value, response });
+    }
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update([FromRoute] int id, [FromForm] ProductRequest request)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var response = await _productService.UpdateProductAsync(id, request, userId);
+        if (!response.IsSuccess) return BadRequest(response);
+        return Ok(new { message = _localizer["Success"].Value, response });
+    }
 
 }
 
