@@ -45,7 +45,7 @@ public class ProductController : ControllerBase
     public async Task<IActionResult> Update([FromRoute] int id, [FromForm] ProductRequest request)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var response = await _productService.UpdateProductAsync(id, request, userId);
+        var response = await _productService.UpdateProductAsync(id, request);
         if (!response.IsSuccess) return BadRequest(response);
         return Ok(new { message = _localizer["Success"].Value, response });
     }
