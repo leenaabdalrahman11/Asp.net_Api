@@ -11,7 +11,7 @@ namespace MyApi.BLL.Service
     public interface ICategoryService
     {
         Task<List<CategoryResponse>> GetAll();
-        Task<CategoryResponse> CreateCategory(CategoryRequest Request);
+        Task<CategoryResponse> CreateCategory(CategoryRequest Request, string? userId);
         Task<BaseResponse> DeleteCategoryAsync(int id);
         Task<BaseResponse> ToggleStatus(int Id);
         Task<BaseResponse> UpdateCategoryAsync(int id, CategoryRequest request);

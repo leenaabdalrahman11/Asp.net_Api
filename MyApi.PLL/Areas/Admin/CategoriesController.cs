@@ -12,7 +12,6 @@ namespace MyApi.PLL.Areas.Admin;
 [ApiController]
 [Route("api/[controller]")]
 //chech if User is login or not - [Authorize]
-[Authorize(Roles = "Admin")]
 public class CategoriesController : ControllerBase
 {
         private readonly ICategoryService _category;
@@ -25,7 +24,8 @@ public class CategoriesController : ControllerBase
     [HttpPost("")]
     public async Task<IActionResult> Create([FromBody]CategoryRequest request)
     {
-        var response =await _category.CreateCategory(request);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);     
+        var response = await _category.CreateCategory(request, userId);
         return Ok(new {message = _localizer["Success"].Value,response}); 
     }
     [HttpPatch("{id}")]
@@ -49,7 +49,7 @@ public class CategoriesController : ControllerBase
         var result = await _category.ToggleStatus(Id);
         if (!result.IsSuccess)
         {
-                    if(result.Message.Contains("Not Found"))
+        if(result.Message.Contains("Not Found"))
         {
             return NotFound(result);
         }
@@ -58,19 +58,20 @@ public class CategoriesController : ControllerBase
         }
         return Ok(result);
     }
+    
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteCAtegory([FromRoute] int id)
     {
         var result = await _category.DeleteCategoryAsync(id);
         if (!result.IsSuccess)
         {
+            
             if(result.Message.Contains("Not Found"))
             {
                 return NotFound(result);
             }
             return BadRequest(result);
         }
-        return Ok(result);
-        
+        return Ok(result);        
     }
 }

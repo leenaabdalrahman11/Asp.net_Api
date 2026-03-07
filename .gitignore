@@ -5,3 +5,5 @@ obj/
 **/obj/
 *.dll
 *.pdb
+**/appsettings.Development.json
+**/appsettings.*.json

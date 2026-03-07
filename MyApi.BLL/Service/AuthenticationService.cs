@@ -16,6 +16,7 @@ using MyApi.DAL.DTO.Requests;
 using MyApi.DAL.DTO.Response;
 using MyApi.DAL.Models;
 using MyApi.BLL.Service;
+using Microsoft.EntityFrameworkCore;
 
 namespace MyApi.BLL.Service
 {
@@ -25,13 +26,15 @@ namespace MyApi.BLL.Service
         private readonly IConfiguration _configuration;
         private readonly IEmailSender _emailSender;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly ITokenService _tokenService;
         public AuthenticationService(UserManager<ApplicationUser> userManager, IConfiguration configuration,
-        IEmailSender emailSender, SignInManager<ApplicationUser> signInManager)
+        IEmailSender emailSender, SignInManager<ApplicationUser> signInManager, ITokenService tokenService)
         {
             _userManager = userManager;
             _configuration = configuration;
             _emailSender = emailSender;
             _signInManager = signInManager;
+            _tokenService = tokenService;
         }
         public async Task<LoginResponse> LoginAsync(LoginRequest loginRequest)
         {
@@ -131,13 +134,18 @@ namespace MyApi.BLL.Service
                         UserId = null
                     };
                 }
-
+                var accessToken = await _tokenService.GenerateAccessToken(user);
+                var refreshToken = _tokenService.GenerateRefreshToken();
+                user.RefreshToken = refreshToken;
+                user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+                await _userManager.UpdateAsync(user);
                 return new LoginResponse
                 {
                     IsSuccess = true,
                     Message = "Login successful",
                     UserId = user.Id,
-                    AccessToken = await GenerateAccessToken(user)
+                    AccessToken = accessToken,
+                    RefreshToken = refreshToken
                 };
 
             }
@@ -214,33 +222,6 @@ namespace MyApi.BLL.Service
                 return "Email confirmed";
             }
             return "Email confirmation failed: " + string.Join(", ", result.Errors.Select(e => e.Description));
-        }
-        private async Task<string> GenerateAccessToken(ApplicationUser user)
-        {
-            var roles = await _userManager.GetRolesAsync(user);
-
-            //payload - Claims
-            var UserClaims = new List<Claim>()
-            {
-
-                new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim(ClaimTypes.Email, user.Email!),
-                new Claim(ClaimTypes.Name, user.UserName!),
-
-                new Claim(ClaimTypes.Role,string.Join(',',roles))
-            };
-            // we need secret key to check
-            var secret = _configuration["Jwt:SecretKey"] ?? throw new InvalidOperationException("Jwt:SecretKey is not configured");
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
-                claims: UserClaims,
-                expires: DateTime.UtcNow.AddMinutes(30),
-                signingCredentials: creds
-            );
-            return new JwtSecurityTokenHandler().WriteToken(token);
         }
         public async Task<ForgotPasswordResponse> RequestPasswordResetAsync(ForgotPasswordRequest request)
         {
@@ -358,6 +339,40 @@ namespace MyApi.BLL.Service
                 Message = "Password reset failed",
                 Errors = result.Errors.Select(e => e.Description)
             };
+        }
+        public async Task<LoginResponse> RefreshTokenAsync(TokenApiModelRequest request)
+        {
+            string accessToken = request.AccessToken;
+            string refreshToken = request.RefreshToken;
+            var principal = _tokenService.GetPrincipalFromExpiredToken(accessToken);
+            var userName = principal.Identity!.Name;
+            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.UserName == userName);
+            if (user == null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+            {
+                return new LoginResponse
+                {
+                    IsSuccess = false,
+                    Message = "Invalid refresh token",
+                    UserId = null,
+                    AccessToken = null,
+                    RefreshToken = null
+                };
+            }
+            var newAccessToken = await _tokenService.GenerateAccessToken(user);
+            var newRefreshToken = _tokenService.GenerateRefreshToken();
+            user.RefreshToken = newRefreshToken;
+            await _userManager.UpdateAsync(user);
+            return new LoginResponse
+            {
+                IsSuccess = true,
+                Message = "Token refreshed successfully",
+                UserId = user.Id,
+                AccessToken = newAccessToken,
+                RefreshToken = newRefreshToken
+            };
+
+
+            
         }
     }
 }

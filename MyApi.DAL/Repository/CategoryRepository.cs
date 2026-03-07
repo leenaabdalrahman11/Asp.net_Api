@@ -25,6 +25,13 @@ public class CategoryRepository : ICategoryRepository
             await _context.SaveChangesAsync();
             return Request;
         }
+        public async Task<Category?> GetByIdAsync(int id)
+{
+    return await _context.Categories
+        .Include(c => c.Translations)
+        .FirstOrDefaultAsync(c => c.Id == id);
+}
+
 
         public async Task<List<Category>> GetAllAsync()
         {

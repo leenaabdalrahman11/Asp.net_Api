@@ -18,7 +18,7 @@ public class EmailSender : IEmailSender
       UseDefaultCredentials = false,
       Credentials = new NetworkCredential(
                   "leenasa272@gmail.com",
-                  "xmbn mfos ykvr uzzg"
+                  "xkvzduxvecxadnng"   
               )
     };
 

@@ -13,6 +13,7 @@ namespace MyApi.DAL.DTO.Response
     public IEnumerable<string>? Errors { get; set; } // detailed errors (if any)
     public string? UserId { get; set; } 
     public string? AccessToken { get; set; }
+    public string? RefreshToken { get; set; }
         
     }
 }

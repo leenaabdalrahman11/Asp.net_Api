@@ -15,15 +15,29 @@ using MyApi.DAL.Utils;
 using MyApi.DAL.Repository;
 using MyApi.PLL;
 using MyApi.BLL.MapesterConfigurations;
+using Stripe;
+using MyApiProject.MyApi.PLL.Middleware;
 
 public class Program
 {
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+        var cs = builder.Configuration.GetConnectionString("DefaultConnection");
+        var  MyAllowSpecificOrigins = "_myAllowOrigins";
+        builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                      policy  =>
+                      {
+                          policy.AllowAnyOrigin()
+                                .AllowAnyMethod()
+                                .AllowAnyHeader();
+                      });
+});
+Console.WriteLine($"DefaultConnection from config = '{cs}'");
 
         builder.Services.AddControllers();
-        builder.Services.AddOpenApi();
         builder.Services.AddLocalization(options => options.ResourcesPath = "");
 
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -45,7 +59,6 @@ public class Program
         })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
-        //for change chalenge
         builder.Services.AddAuthentication(opt =>
         {
             opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -106,18 +119,25 @@ public class Program
                 }
             });
         }
-
         );*/
 
         AppConfigration.Config(builder.Services);
+
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
+
         MapesterConfig.MapesterConfRegister();
+        builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),sql => sql.EnableRetryOnFailure()));
+        builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
+        StripeConfiguration.ApiKey =builder.Configuration["Stripe:SecretKey"];
+        builder.Services.AddScoped<ICartRepository, CartRepository>();
         var app = builder.Build();
 
         app.UseRequestLocalization(app.Services.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value);
 
         if (app.Environment.IsDevelopment())
         {
-            app.MapOpenApi();
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
@@ -125,7 +145,9 @@ public class Program
                 c.RoutePrefix = "swagger";
             });
         }
-
+        app.UseCors(MyAllowSpecificOrigins);
+        app.UseExceptionHandler();
+        app.UseStaticFiles();
         app.UseHttpsRedirection();
         app.UseAuthentication();
         app.UseAuthorization();
@@ -145,6 +167,7 @@ public class Program
         }
 
         app.MapControllers();
+
         app.Run();
     }
 }
