@@ -1,5 +1,6 @@
 using System;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using MyApi.DAL.Data;
 using MyApi.DAL.DTO.Response;
 using MyApi.DAL.Models;
@@ -57,10 +58,29 @@ public class ProductRepository : IProductRepository
 
 
 
-
         await _context.SaveChangesAsync();
         return true;
 
 
+    }
+    public async Task<BaseResponse> DeleteAsync(Product product)
+    {
+        _context.Products.Remove(product);
+        await _context.SaveChangesAsync();
+        return new BaseResponse
+        {
+            IsSuccess = true,
+            Message = "Product deleted successfully"
+        };
+    }
+    public async Task<BaseResponse> UpdateAsync(Product product)
+    {
+        _context.Products.Update(product);
+        await _context.SaveChangesAsync();
+        return new BaseResponse
+        {
+            IsSuccess = true,
+            Message = "Product updated successfully"
+        };
     }
 }

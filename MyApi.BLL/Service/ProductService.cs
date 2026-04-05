@@ -1,6 +1,7 @@
 using System;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 using MyApi.BLL.Service;
 using MyApi.DAL.Data;
 using MyApi.DAL.DTO.Requests;
@@ -56,83 +57,148 @@ public class ProductService : IProductService
         var products = await _productRepository.GetAllAsync();
         return products.Adapt<List<ProductResponse>>();
     }
-    public Task<BaseResponse> DeleteProductAsync(int id)
-    {
-        throw new NotImplementedException();
-    }
-    
-    public async Task<PaginatResponse<ProductUserResponse>> GetAllProductsForUser(string lang ="en"
-    ,int page = 1,int limit = 3,string? search =null, int? categoryId = null , decimal ? minPrice = null,
+
+    public async Task<PaginatResponse<ProductUserResponse>> GetAllProductsForUser(string lang = "en"
+    , int page = 1, int limit = 3, string? search = null, int? categoryId = null, decimal? minPrice = null,
      decimal? maxPrice = null, decimal? minRate = null, decimal? maxRate = null,
      string? sortBy = null, bool asc = true)
     {
         var query = _productRepository.Query();
 
-        if(search is not null)
+        if (search is not null)
         {
-            query = query.Where(p => p.Translations.Any(t=>t.Language == lang && t.Name.Contains(search) || t.Description.Contains(search)));
+            query = query.Where(p => p.Translations.Any(t => t.Language == lang && t.Name.Contains(search) || t.Description.Contains(search)));
         }
-        if(categoryId is not null)
+        if (categoryId is not null)
         {
             query = query.Where(p => p.CategoryId == categoryId);
         }
-        if(minPrice is not null)
+        if (minPrice is not null)
         {
             query = query.Where(p => p.Price >= minPrice);
         }
-        if(maxPrice is not null)
+        if (maxPrice is not null)
         {
             query = query.Where(p => p.Price <= maxPrice);
         }
-        if(minRate is not null)
+        if (minRate is not null)
         {
             query = query.Where(p => p.Rate >= minRate);
         }
-        if(maxRate is not null)
+        if (maxRate is not null)
         {
             query = query.Where(p => p.Rate <= maxRate);
         }
-        if(sortBy is not null)
+        if (sortBy is not null)
         {
             sortBy = sortBy.ToLower();
-            if(sortBy == "price")
+            if (sortBy == "price")
             {
                 query = asc ? query.OrderBy(p => p.Price) : query.OrderByDescending(p => p.Price);
             }
-            else if(sortBy == "name")
+            else if (sortBy == "name")
             {
-                query = asc ? query.OrderBy(p => p.Translations.FirstOrDefault(t => t.Language == lang).Name) 
+                query = asc ? query.OrderBy(p => p.Translations.FirstOrDefault(t => t.Language == lang).Name)
                 : query.OrderByDescending(p => p.Translations.FirstOrDefault(t => t.Language == lang).Name);
             }
-            else if(sortBy == "rate")
+            else if (sortBy == "rate")
             {
                 query = asc ? query.OrderBy(p => p.Rate) : query.OrderByDescending(p => p.Rate);
             }
-            else if(sortBy == "createdAt")
+            else if (sortBy == "createdAt")
             {
                 query = asc ? query.OrderBy(p => p.CreatedAt) : query.OrderByDescending(p => p.CreatedAt);
             }
         }
-        var totalCount =await query.CountAsync();
+        var totalCount = await query.CountAsync();
         query = query.Skip((page - 1) * limit).Take(limit);
         var response = query.BuildAdapter().AddParameters("lang", lang).AdaptToType<List<ProductUserResponse>>();
-        
-        return 
+
+        return
             new PaginatResponse<ProductUserResponse>
             {
                 TotalCount = totalCount,
                 Page = page,
                 Limit = limit,
                 Data = response
-        };
+            };
     }
-    public async Task<ProductUserDetails> GetProductsDetailsForUser(int id, string lang = "en")
+    public async Task<BaseResponse> DeleteProductAsync(int id)
     {
-        var products = await _productRepository.FindByIdAsync(id);
-        var response = products.BuildAdapter().AddParameters("lang", lang).AdaptToType<ProductUserDetails>();
-        return response;
+        var product = await _productRepository.FindByIdAsync(id);
+        if (product == null)
+        {
+            return new BaseResponse
+            {
+                IsSuccess = false,
+                Message = "Product not found"
+            };
+        }
+        foreach (var image in product.SubImages)
+        {
+            await _fileService.DeleteAsync(image.ImageName);
+        }
+        if (product.MainImage != null)
+        {
+            await _fileService.DeleteAsync(product.MainImage);
+        }
+        return await _productRepository.DeleteAsync(product);
+    }
+public async Task<BaseResponse> UpdateProductAsync(int id, ProductRequest request)
+{
+    var product = await _productRepository.Query()
+        .Include(p => p.SubImages)
+        .Include(p => p.Translations)
+        .FirstOrDefaultAsync(p => p.Id == id);
+
+    if (product == null)
+        return new BaseResponse { IsSuccess = false, Message = "Product not found" };
+
+    var productTranslation = product.Translations?
+        .FirstOrDefault(t => t.Language == "en");
+
+    var requestTranslation = request.Translations?
+        .FirstOrDefault(t => t.Language == "en");
+
+    if (productTranslation != null && requestTranslation != null)
+    {
+        productTranslation.Name = requestTranslation.Name;
+        productTranslation.Description = requestTranslation.Description;
+    }
+if (request.Price > 0)
+    product.Price = request.Price;
+
+if (request.CategoryId > 0)
+    product.CategoryId = request.CategoryId;
+
+    if (request.MainImage != null)
+    {
+        var imageUrl = await _fileService.UploadAsync(request.MainImage);
+        product.MainImage = imageUrl;
     }
 
+    if (request.SubImages != null && request.SubImages.Any())
+    {
+        foreach (var image in product.SubImages)
+            await _fileService.DeleteAsync(image.ImageName);
+
+        product.SubImages.Clear();
+
+        foreach (var image in request.SubImages)
+        {
+            var imageUrl = await _fileService.UploadAsync(image);
+            product.SubImages.Add(new ProductImage { ImageName = imageUrl });
+        }
+    }
+
+    await _productRepository.UpdateAsync(product);
+
+    return new BaseResponse
+    {
+        IsSuccess = true,
+        Message = "Product updated successfully"
+    };
+}
     public Task<List<ProductResponse>> GetAll()
     {
         throw new NotImplementedException();
@@ -143,9 +209,11 @@ public class ProductService : IProductService
         throw new NotImplementedException();
     }
 
-    public Task<BaseResponse> UpdateProductAsync(int id, ProductRequest request)
+    public async Task<ProductUserDetails> GetProductsDetailsForUser(int id, string lang = "en")
     {
-        throw new NotImplementedException();
-    }
+        var products = await _productRepository.FindByIdAsync(id);
+        var response = products.BuildAdapter().AddParameters("lang", lang).AdaptToType<ProductUserDetails>();
+        return response;
 
+    }
 }

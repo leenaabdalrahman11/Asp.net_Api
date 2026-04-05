@@ -177,7 +177,7 @@ namespace MyApi.BLL.Service
                     var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     token = Uri.EscapeDataString(token);
 
-                    var emailUrl = $"https://localhost:7291/api/auth/Account/confirmEmail?userId={user.Id}&token={token}";
+                    var emailUrl = $"http://leena12.runasp.net/api/auth/Account/confirmEmail?userId={user.Id}&token={token}";
                     var htmlMessage = $"<h1>Thank you for registering!</h1><a href='{emailUrl}'>Click here to verify your email</a>";
                     await _emailSender.SendEmailAsync(user.Email!, "Welcome to MyApi", htmlMessage);
 
@@ -360,7 +360,10 @@ namespace MyApi.BLL.Service
             }
             var newAccessToken = await _tokenService.GenerateAccessToken(user);
             var newRefreshToken = _tokenService.GenerateRefreshToken();
+
             user.RefreshToken = newRefreshToken;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+
             await _userManager.UpdateAsync(user);
             return new LoginResponse
             {
@@ -372,7 +375,7 @@ namespace MyApi.BLL.Service
             };
 
 
-            
+
         }
     }
 }

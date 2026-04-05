@@ -78,8 +78,8 @@ public class CheckoutService : ICheckoutService
 				LineItems = new List<SessionLineItemOptions>(),
 				Mode = "payment",
 
-				SuccessUrl = "https://localhost:7291/api/checkout/success?session_id={CHECKOUT_SESSION_ID}",
-				CancelUrl = "https://localhost:7291/api/checkout/cancel",
+				SuccessUrl = "http://leena12.runasp.net/api/checkout/success?session_id={CHECKOUT_SESSION_ID}",
+				CancelUrl = "http://leena12.runasp.net/api/checkout/cancel",
 
 				Metadata = new Dictionary<string, string>
 				{

@@ -123,35 +123,35 @@ public class CartService : ICartService
             Message = "Cart updated successfully."
         };
     }
-    public async Task<BaseResponse> RemoveFromCartAsync(int productId, string userId)
+public async Task<BaseResponse> RemoveFromCartAsync(int productId, string userId)
+{
+    var cartItem = await _cartRepository.GetCartItemAsync(userId, productId);
+    if (cartItem == null)
     {
-        var cartItem = await _cartRepository.GetCartItemAsync(userId, productId);
-        if (cartItem == null)
-        {
-            return new BaseResponse
-            {
-                IsSuccess = false,
-                Message = "Product not found in cart."
-            };
-        }
-        cartItem.Count -= 1;
-        await _cartRepository.DeleteAsync(cartItem);
-        if(cartItem.Count <= 0)
-        {
-            await _cartRepository.ClearCartAsync(userId);
-        }
-        else
-        {
-            await _cartRepository.UpdateAsync(cartItem);
-        }
-        
         return new BaseResponse
         {
-            IsSuccess = true,
-            Message = "Product removed from cart successfully."
+            IsSuccess = false,
+            Message = "Product not found in cart."
         };
     }
-    public async Task<BaseResponse> ClearCartAsync(string userId)
+
+    cartItem.Count -= 1;
+
+    if (cartItem.Count <= 0)
+    {
+        await _cartRepository.DeleteAsync(cartItem);
+    }
+    else
+    {
+        await _cartRepository.UpdateAsync(cartItem);
+    }
+
+    return new BaseResponse
+    {
+        IsSuccess = true,
+        Message = "Product removed from cart successfully."
+    };
+}    public async Task<BaseResponse> ClearCartAsync(string userId)
     {
         await _cartRepository.ClearCartAsync(userId);
         return new BaseResponse

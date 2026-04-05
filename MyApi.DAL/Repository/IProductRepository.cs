@@ -11,4 +11,6 @@ public interface IProductRepository
     Task<bool> DecreaseQuantityAsync(List<(int productId, int quantity)> items);
     Task<Product?> FindByIdAsync(int id);     
     IQueryable<Product> Query();
+    Task<BaseResponse> DeleteAsync(Product product);
+    Task<BaseResponse> UpdateAsync(Product product);
 }

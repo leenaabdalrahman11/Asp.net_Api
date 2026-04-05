@@ -16,7 +16,9 @@ using MyApi.DAL.Repository;
 using MyApi.PLL;
 using MyApi.BLL.MapesterConfigurations;
 using Stripe;
+using MyApi.BLL.Settings;
 using MyApiProject.MyApi.PLL.Middleware;
+using Microsoft.AspNetCore.StaticFiles;
 
 public class Program
 {
@@ -24,19 +26,20 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         var cs = builder.Configuration.GetConnectionString("DefaultConnection");
-        var  MyAllowSpecificOrigins = "_myAllowOrigins";
+        var MyAllowSpecificOrigins = "_myAllowOrigins";
         builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins,
-                      policy  =>
+                      policy =>
                       {
                           policy.AllowAnyOrigin()
                                 .AllowAnyMethod()
                                 .AllowAnyHeader();
                       });
 });
-Console.WriteLine($"DefaultConnection from config = '{cs}'");
-
+        Console.WriteLine($"DefaultConnection from config = '{cs}'");
+builder.Services.Configure<CloudinarySettings>(
+    builder.Configuration.GetSection("CloudinarySettings"));
         builder.Services.AddControllers();
         builder.Services.AddLocalization(options => options.ResourcesPath = "");
 
@@ -92,35 +95,6 @@ Console.WriteLine($"DefaultConnection from config = '{cs}'");
             });
         });
 
-        /*builder.Services.AddSwaggerGen(c =>
-        {
-            c.SwaggerDoc("v1", new() { Title = "My API", Version = "v1" });
-            c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-            {
-                Name = "Authorization",
-                Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
-                Scheme = "Bearer",
-                BearerFormat = "JWT",
-                In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-                Description = "JWT Authorization header using the Bearer scheme."
-            });
-            c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
-            {
-                {
-                    new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-                    {
-                        Reference = new Microsoft.OpenApi.Models.OpenApiReference
-                        {
-                            Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        }
-                    },
-                    Array.Empty<string>()
-                }
-            });
-        }
-        );*/
-
         AppConfigration.Config(builder.Services);
 
         builder.Services.AddEndpointsApiExplorer();
@@ -128,9 +102,9 @@ Console.WriteLine($"DefaultConnection from config = '{cs}'");
 
         MapesterConfig.MapesterConfRegister();
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),sql => sql.EnableRetryOnFailure()));
+            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), sql => sql.EnableRetryOnFailure()));
         builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
-        StripeConfiguration.ApiKey =builder.Configuration["Stripe:SecretKey"];
+        StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
         builder.Services.AddScoped<ICartRepository, CartRepository>();
         var app = builder.Build();
 
@@ -145,6 +119,14 @@ Console.WriteLine($"DefaultConnection from config = '{cs}'");
                 c.RoutePrefix = "swagger";
             });
         }
+
+        var provider = new FileExtensionContentTypeProvider();
+        provider.Mappings[".avif"] = "image/avif";
+
+        app.UseStaticFiles(new StaticFileOptions
+        {
+            ContentTypeProvider = provider
+        });
         app.UseCors(MyAllowSpecificOrigins);
         app.UseExceptionHandler();
         app.UseStaticFiles();

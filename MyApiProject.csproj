@@ -29,6 +29,8 @@
     <PackageReference Include="Mapster.DependencyInjection" Version="9.0.0-pre01" />
 
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.8" />
+
+    <PackageReference Include="Stripe.net" Version="50.4.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.1" />
   </ItemGroup>
 
